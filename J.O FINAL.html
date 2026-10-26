@@ -376,6 +376,17 @@
             outline: 2px dashed #7A0A0A;
         }
 
+        .blank-page-content {
+            width: 100%;
+            min-height: 100%;
+            outline: none;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
+        .blank-page-content:focus {
+            outline: 2px dashed #7A0A0A;
+        }
+
         .doc-header {
             display: flex;
             justify-content: space-between;
@@ -1014,6 +1025,9 @@
                 </button>
                 <button class="submit-btn" type="button" onclick="addNewPage()">
                     📄 Add Page Below
+                </button>
+                <button class="submit-btn" type="button" onclick="addBlankPage()">
+                    📄 Add Blank Page
                 </button>
                 
                 <button class="submit-btn" type="button" style="background-color: #555;" onclick="triggerOpenInNewTab()">
@@ -1932,6 +1946,7 @@
                 page2Text: pageTwoTextEl.innerHTML,
                 page2Added: paper2.dataset.added === "true",
                 additionalPages: Array.from(document.querySelectorAll('.additional-page')).map(page => page.innerHTML),
+                blankPages: Array.from(document.querySelectorAll('.blank-page-content')).map(page => page.innerHTML),
 
                 lineup: {
                     artist: document.getElementById('lineup-artist').innerText,
@@ -2117,6 +2132,9 @@
 
             if (Array.isArray(data.additionalPages)) {
                 data.additionalPages.forEach(pageData => createAdditionalPage(pageData));
+            }
+            if (Array.isArray(data.blankPages)) {
+                data.blankPages.forEach(pageContent => createBlankPage(pageContent));
             }
 
             if (data.imagesData) {
@@ -2442,6 +2460,30 @@
             autoSaveState();
             page.scrollIntoView({ behavior: 'smooth', block: 'start' });
             page.querySelector('.meta-table .editable-cell').focus();
+        }
+
+        function createBlankPage(content = '') {
+            const page = document.createElement('div');
+            const pageNumber = document.querySelectorAll('.blank-page').length + 1;
+            const editableArea = document.createElement('div');
+
+            page.className = 'a4-container blank-page';
+            page.id = `blank-page-${pageNumber}`;
+            editableArea.className = 'blank-page-content';
+            editableArea.contentEditable = 'true';
+            editableArea.innerHTML = content;
+            page.appendChild(editableArea);
+            document.getElementById('global-preview-panel').appendChild(page);
+            registerFocusTrack(editableArea);
+            editableArea.addEventListener('input', autoSaveState);
+            return page;
+        }
+
+        function addBlankPage() {
+            const page = createBlankPage();
+            autoSaveState();
+            page.scrollIntoView({ behavior: 'smooth', block: 'start' });
+            page.querySelector('.blank-page-content').focus();
         }
     </script>
 </body>
